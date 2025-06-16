@@ -40,10 +40,9 @@ function useAuth() {
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
   const [messages, setMessages] = useState([]);
-  let ws;
 
   useEffect(() => {
-    ws = new WebSocket(`ws://${window.location.host}:5000`);
+    const ws = new WebSocket(`${window.location.origin.replace(/^http/, 'ws')}/`);
 
     ws.onmessage = (event) => {
       setMessages((prevMessages) => [...prevMessages, event.data]);
@@ -55,9 +54,10 @@ function Router() {
   }, []);
 
   const sendMessage = (message) => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
+    const ws = new WebSocket(`${window.location.origin.replace(/^http/, 'ws')}/`);
+    ws.onopen = () => {
       ws.send(message);
-    }
+    };
   };
 
   if (isLoading) {
