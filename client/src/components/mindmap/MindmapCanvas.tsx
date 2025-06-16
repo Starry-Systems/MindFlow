@@ -1,6 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Crosshair } from "lucide-react";
+import { useCollaboration } from "@/hooks/useCollaboration";
+
+
+const MindmapCanvas = (props) => {
+  // ...existing state and logic...
+
+  // Example: Replace with your actual state update logic
+  const applyRemoteChange = (data: any) => {
+    if (data.type === "nodeChange") {
+      // Update your mindmap state here, e.g.:
+      // setNodes((prev) => updateNodes(prev, data.payload));
+    }
+  };
+
+  const { send } = useCollaboration(applyRemoteChange);
+
+  // Call this function whenever a user makes a change
+  const handleNodeChange = (change: any) => {
+    // Update local state
+    // setNodes((prev) => updateNodes(prev, change));
+    // Broadcast to collaborators
+    send({ type: "nodeChange", payload: change });
+  };
+
+  // ...pass handleNodeChange to your node editing logic...
+
+
+};
+
+export default MindmapCanvas;
+
+
 
 interface Node {
   id: string;
