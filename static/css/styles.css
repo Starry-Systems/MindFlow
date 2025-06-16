@@ -125,6 +125,34 @@ body {
     font-size: 1rem;
 }
 
+.google-btn {
+    background: #4285f4;
+    color: white;
+    border: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    justify-content: center;
+}
+
+.google-btn:hover {
+    background: #3367d6;
+}
+
+.auth-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.hero-buttons, .cta-buttons {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
 /* Landing Page */
 .landing-page {
     min-height: 100vh;

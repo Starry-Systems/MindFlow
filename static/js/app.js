@@ -40,9 +40,20 @@ class App {
         document.getElementById('app').classList.add('hidden');
         
         // Bind landing page events
-        document.getElementById('loginBtn').onclick = () => window.auth.login();
-        document.getElementById('getStartedBtn').onclick = () => window.auth.login();
-        document.getElementById('startCreatingBtn').onclick = () => window.auth.login();
+        const bindAuthButton = (id, authMethod) => {
+            const btn = document.getElementById(id);
+            if (btn) btn.onclick = authMethod;
+        };
+
+        // Google authentication buttons
+        bindAuthButton('googleLoginBtn', () => window.auth.loginWithGoogle());
+        bindAuthButton('getStartedGoogleBtn', () => window.auth.loginWithGoogle());
+        bindAuthButton('startCreatingGoogleBtn', () => window.auth.loginWithGoogle());
+
+        // Replit authentication buttons
+        bindAuthButton('replitLoginBtn', () => window.auth.loginWithReplit());
+        bindAuthButton('getStartedReplitBtn', () => window.auth.loginWithReplit());
+        bindAuthButton('startCreatingReplitBtn', () => window.auth.loginWithReplit());
     }
 
     showApp() {

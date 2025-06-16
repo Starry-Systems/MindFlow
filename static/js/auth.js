@@ -25,8 +25,17 @@ class AuthManager {
         }
     }
 
-    login() {
+    loginWithGoogle() {
+        window.location.href = '/api/auth/google';
+    }
+
+    loginWithReplit() {
         window.location.href = '/api/login';
+    }
+
+    // Default login (prefer Google if available)
+    login() {
+        this.loginWithGoogle();
     }
 
     logout() {
