@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
@@ -126,7 +125,7 @@ export default function MindmapsPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -138,7 +137,7 @@ export default function MindmapsPage() {
               Create and manage your visual thinking projects
             </p>
           </div>
-          
+
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
@@ -231,12 +230,14 @@ export default function MindmapsPage() {
                     </div>
                   </CardTitle>
                   <CardDescription>
-                    Created {formatDate(mindmap.createdAt)}
-                    {mindmap.updatedAt !== mindmap.createdAt && (
-                      <br />
-                      <span>Updated {formatDate(mindmap.updatedAt)}</span>
-                    )}
-                  </CardDescription>
+                      Created {formatDate(mindmap.createdAt)}
+                      {mindmap.updatedAt !== mindmap.createdAt && (
+                        <>
+                          <br />
+                          <span>Updated {formatDate(mindmap.updatedAt)}</span>
+                        </>
+                      )}
+                    </CardDescription>
                 </CardHeader>
                 <CardContent onClick={() => navigate(`/mindmap/${mindmap.id}`)}>
                   <div className="text-sm text-gray-600">

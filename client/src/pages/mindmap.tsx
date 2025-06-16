@@ -372,7 +372,14 @@ useEffect(() => {
       </div>
     );
   }
-<div className="flex-1 relative">
+return (
+    <div className="min-h-screen bg-gray-50">
+      <Header 
+        currentMindmap={mindmap}
+        onTitleChange={handleTitleChange}
+      />
+
+      <div className="flex-1 relative">
         <MindmapCanvas ref={mindmapEngine} />
         <FloatingToolbar onSave={handleSave} />
         <PropertiesSidebar />
@@ -395,3 +402,6 @@ useEffect(() => {
           </div>
         </div>
       </div>
+    </div>
+  );
+}
