@@ -72,7 +72,7 @@ export class MindmapEngine {
       color: '#2563EB',
       shape: 'rounded-rectangle'
     };
-    
+
     this.data.nodes.push(node);
     this.render();
     return node;
@@ -102,7 +102,7 @@ export class MindmapEngine {
       style: 'curved',
       thickness: 2
     };
-    
+
     this.data.connections.push(connection);
     this.render();
     return connection;
@@ -116,7 +116,7 @@ export class MindmapEngine {
     for (const node of this.data.nodes) {
       const nodeWidth = this.getNodeWidth(node);
       const nodeHeight = this.getNodeHeight(node);
-      
+
       if (transformedX >= node.x && transformedX <= node.x + nodeWidth &&
           transformedY >= node.y && transformedY <= node.y + nodeHeight) {
         return node;
@@ -136,20 +136,20 @@ export class MindmapEngine {
 
   render() {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    
+
     // Set background
     this.ctx.fillStyle = this.data.canvas.background;
     this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
 
     this.ctx.save();
-    
+
     // Apply zoom and pan
     this.ctx.translate(this.data.canvas.panX, this.data.canvas.panY);
     this.ctx.scale(this.data.canvas.zoom, this.data.canvas.zoom);
 
     // Draw connections first (behind nodes)
     this.renderConnections();
-    
+
     // Draw nodes
     this.renderNodes();
 
@@ -194,7 +194,7 @@ export class MindmapEngine {
 
   private drawNodeShape(node: Node, width: number, height: number, x: number, y: number) {
     this.ctx.beginPath();
-    
+
     switch (node.shape) {
       case 'circle':
         const radius = Math.min(width, height) / 2;
@@ -225,7 +225,7 @@ export class MindmapEngine {
   private renderConnection(connection: Connection) {
     const fromNode = this.data.nodes.find(n => n.id === connection.from);
     const toNode = this.data.nodes.find(n => n.id === connection.to);
-    
+
     if (!fromNode || !toNode) return;
 
     const fromX = fromNode.x + this.getNodeWidth(fromNode) / 2;
@@ -238,7 +238,7 @@ export class MindmapEngine {
     this.ctx.setLineDash([]);
 
     this.ctx.beginPath();
-    
+
     if (connection.style === 'curved') {
       const controlX = (fromX + toX) / 2;
       const controlY = Math.min(fromY, toY) - 50;
@@ -253,7 +253,7 @@ export class MindmapEngine {
       this.ctx.moveTo(fromX, fromY);
       this.ctx.lineTo(toX, toY);
     }
-    
+
     this.ctx.stroke();
 
     // Draw arrowhead
@@ -263,7 +263,7 @@ export class MindmapEngine {
   private drawArrowhead(fromX: number, fromY: number, toX: number, toY: number) {
     const angle = Math.atan2(toY - fromY, toX - fromX);
     const arrowLength = 10;
-    
+
     this.ctx.beginPath();
     this.ctx.moveTo(toX, toY);
     this.ctx.lineTo(

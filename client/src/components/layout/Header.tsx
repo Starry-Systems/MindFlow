@@ -111,6 +111,10 @@ export default function Header({
               {user?.email}
             </div>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={() => onMindmapSelect(null)}>
+              My Mindmaps
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
               Sign Out
             </DropdownMenuItem>

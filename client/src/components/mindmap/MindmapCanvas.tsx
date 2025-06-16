@@ -47,7 +47,7 @@ export default function MindmapCanvas({
 
     canvas.width = container.clientWidth;
     canvas.height = container.clientHeight;
-    
+
     renderCanvas();
   }, [mindmapData, zoom, pan, selectedNode]);
 
@@ -83,7 +83,7 @@ export default function MindmapCanvas({
   const drawNode = (ctx: CanvasRenderingContext2D, node: Node, isSelected: boolean) => {
     const padding = 12;
     const minWidth = 80;
-    
+
     // Measure text
     ctx.font = '14px Inter, sans-serif';
     const textWidth = Math.max(ctx.measureText(node.text).width + padding * 2, minWidth);
@@ -121,7 +121,7 @@ export default function MindmapCanvas({
     y: number
   ) => {
     const cornerRadius = 8;
-    
+
     ctx.beginPath();
     switch (node.shape) {
       case 'circle':
@@ -168,7 +168,7 @@ export default function MindmapCanvas({
     connections.forEach(connection => {
       const fromNode = nodes.find(n => n.id === connection.from);
       const toNode = nodes.find(n => n.id === connection.to);
-      
+
       if (!fromNode || !toNode) return;
 
       const fromX = fromNode.x + 40; // Center of node
@@ -222,7 +222,7 @@ export default function MindmapCanvas({
     for (const node of mindmapData.nodes) {
       const nodeWidth = Math.max(80, node.text.length * 8 + 24);
       const nodeHeight = 36;
-      
+
       if (x >= node.x && x <= node.x + nodeWidth &&
           y >= node.y && y <= node.y + nodeHeight) {
         return node;
@@ -268,7 +268,7 @@ export default function MindmapCanvas({
     if (dragNode) {
       const deltaX = e.clientX - dragStart.x;
       const deltaY = e.clientY - dragStart.y;
-      
+
       const updatedNodes = mindmapData.nodes.map((node: Node) => 
         node.id === dragNode.id 
           ? { ...node, x: node.x + deltaX / zoom, y: node.y + deltaY / zoom }
@@ -284,7 +284,7 @@ export default function MindmapCanvas({
     } else if (isDragging) {
       const deltaX = e.clientX - dragStart.x;
       const deltaY = e.clientY - dragStart.y;
-      
+
       setPan(prev => ({
         x: prev.x + deltaX,
         y: prev.y + deltaY

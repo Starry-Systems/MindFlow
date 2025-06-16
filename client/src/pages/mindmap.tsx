@@ -1,14 +1,12 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import Header from "@/components/layout/Header";
 import MindmapCanvas from "@/components/mindmap/MindmapCanvas";
 import FloatingToolbar from "@/components/mindmap/FloatingToolbar";
 import PropertiesSidebar from "@/components/mindmap/PropertiesSidebar";
 import FileOperations from "@/components/mindmap/FileOperations";
+import MindmapList from "@/components/mindmap/MindmapList";
 import type { Mindmap } from "@shared/schema";
 
 interface MindmapData {
@@ -34,245 +32,236 @@ interface MindmapData {
 }
 
 export default function MindmapPage() {
+  const { user, loading } = useAuth();
   const { toast } = useToast();
-  const { isAuthenticated, isLoading } = useAuth();
-  const queryClient = useQueryClient();
   const [currentMindmap, setCurrentMindmap] = useState<Mindmap | null>(null);
-  const [selectedTool, setSelectedTool] = useState<string>("select");
-  const [selectedNode, setSelectedNode] = useState<any>(null);
-  const [showPropertiesSidebar, setShowPropertiesSidebar] = useState(true);
+  const [mindmaps, setMindmaps] = useState<Mindmap[]>([]);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showMindmapList, setShowMindmapList] = useState(false);
+  const [autoSaveTimeout, setAutoSaveTimeout] = useState<NodeJS.Timeout | null>(null);
 
-  // Redirect to home if not authenticated
-  useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
+  // Load mindmaps from database
+  const loadMindmaps = async () => {
+    try {
+      const response = await fetch('/api/mindmaps');
+      if (response.ok) {
+        const data = await response.json();
+        setMindmaps(data);
+
+        // If no current mindmap and we have mindmaps, load the first one
+        if (!currentMindmap && data.length > 0) {
+          setCurrentMindmap(data[0]);
+        }
+        // If no mindmaps exist, create a default one
+        else if (data.length === 0) {
+          await createMindmap("My First Mindmap");
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load mindmaps:', error);
       toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+        title: "Error",
+        description: "Failed to load mindmaps",
         variant: "destructive",
       });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
-      return;
     }
-  }, [isAuthenticated, isLoading, toast]);
+  };
 
-  // Fetch user's mindmaps
-  const { data: mindmaps } = useQuery({
-    queryKey: ["/api/mindmaps"],
-    enabled: !!isAuthenticated,
-  });
+  // Create new mindmap
+  const createMindmap = async (name: string) => {
+    try {
+      const defaultData = {
+        nodes: [{
+          id: '1',
+          x: 400,
+          y: 300,
+          text: 'Central Idea',
+          color: '#2563EB',
+          shape: 'rounded-rectangle'
+        }],
+        connections: [],
+        canvas: {
+          zoom: 1,
+          panX: 0,
+          panY: 0,
+          background: '#ffffff'
+        }
+      };
 
-  // Create new mindmap mutation
-  const createMindmapMutation = useMutation({
-    mutationFn: async (data: { name: string; data: MindmapData }) => {
-      const response = await apiRequest("POST", "/api/mindmaps", data);
-      return response.json();
-    },
-    onSuccess: (newMindmap) => {
-      setCurrentMindmap(newMindmap);
-      queryClient.invalidateQueries({ queryKey: ["/api/mindmaps"] });
-      toast({
-        title: "Success",
-        description: "New mindmap created!",
+      const response = await fetch('/api/mindmaps', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name, data: defaultData })
       });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
+
+      if (response.ok) {
+        const newMindmap = await response.json();
+        setMindmaps(prev => [newMindmap, ...prev]);
+        setCurrentMindmap(newMindmap);
         toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
+          title: "Success",
+          description: "New mindmap created",
         });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
       }
+    } catch (error) {
+      console.error('Failed to create mindmap:', error);
       toast({
         title: "Error",
         description: "Failed to create mindmap",
         variant: "destructive",
       });
-    },
-  });
+    }
+  };
 
-  // Update mindmap mutation
-  const updateMindmapMutation = useMutation({
-    mutationFn: async (data: { id: string; name?: string; data?: MindmapData }) => {
-      const response = await apiRequest("PUT", `/api/mindmaps/${data.id}`, {
-        name: data.name,
-        data: data.data,
+  // Save current mindmap
+  const saveMindmap = async (data?: any, name?: string) => {
+    if (!currentMindmap) return;
+
+    try {
+      const updateData: any = {};
+      if (data !== undefined) updateData.data = data;
+      if (name !== undefined) updateData.name = name;
+
+      const response = await fetch(`/api/mindmaps/${currentMindmap.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updateData)
       });
-      return response.json();
-    },
-    onSuccess: (updatedMindmap) => {
-      setCurrentMindmap(updatedMindmap);
-      queryClient.invalidateQueries({ queryKey: ["/api/mindmaps"] });
-    },
-    onError: (error) => {
-      if (isUnauthorizedError(error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
-        return;
+
+      if (response.ok) {
+        const updatedMindmap = await response.json();
+        setCurrentMindmap(updatedMindmap);
+        setMindmaps(prev => prev.map(m => m.id === updatedMindmap.id ? updatedMindmap : m));
       }
+    } catch (error) {
+      console.error('Failed to save mindmap:', error);
       toast({
         title: "Error",
         description: "Failed to save mindmap",
         variant: "destructive",
       });
-    },
-  });
-
-  // Initialize with default mindmap if none exist
-  useEffect(() => {
-    if (mindmaps && mindmaps.length === 0 && !currentMindmap) {
-      const defaultData: MindmapData = {
-        nodes: [
-          {
-            id: "1",
-            x: 400,
-            y: 300,
-            text: "Main Idea",
-            color: "#2563EB",
-            shape: "rounded-rectangle"
-          }
-        ],
-        connections: [],
-        canvas: {
-          zoom: 1.0,
-          panX: 0,
-          panY: 0,
-          background: "#ffffff"
-        }
-      };
-
-      createMindmapMutation.mutate({
-        name: "My First Mindmap",
-        data: defaultData
-      });
-    } else if (mindmaps && mindmaps.length > 0 && !currentMindmap) {
-      setCurrentMindmap(mindmaps[0]);
     }
-  }, [mindmaps, currentMindmap]);
+  };
 
-  const handleMindmapUpdate = (data: MindmapData) => {
-    if (currentMindmap) {
-      updateMindmapMutation.mutate({
-        id: currentMindmap.id,
-        data
+  // Auto-save with debouncing
+  const scheduleAutoSave = (data: any) => {
+    if (autoSaveTimeout) {
+      clearTimeout(autoSaveTimeout);
+    }
+
+    const timeout = setTimeout(() => {
+      saveMindmap(data);
+    }, 2000); // Auto-save after 2 seconds of inactivity
+
+    setAutoSaveTimeout(timeout);
+  };
+
+  // Delete mindmap
+  const deleteMindmap = async (id: string) => {
+    try {
+      const response = await fetch(`/api/mindmaps/${id}`, {
+        method: 'DELETE'
+      });
+
+      if (response.ok) {
+        setMindmaps(prev => prev.filter(m => m.id !== id));
+        if (currentMindmap?.id === id) {
+          const remaining = mindmaps.filter(m => m.id !== id);
+          setCurrentMindmap(remaining.length > 0 ? remaining[0] : null);
+        }
+        toast({
+          title: "Success",
+          description: "Mindmap deleted",
+        });
+      }
+    } catch (error) {
+      console.error('Failed to delete mindmap:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete mindmap",
+        variant: "destructive",
       });
     }
   };
 
   const handleMindmapNameChange = (name: string) => {
-    if (currentMindmap) {
-      updateMindmapMutation.mutate({
-        id: currentMindmap.id,
-        name
-      });
+    saveMindmap(undefined, name);
+  };
+
+  const handleMindmapSelect = (mindmap: Mindmap | null) => {
+    if (mindmap === null) {
+      // Show mindmap list
+      setShowMindmapList(true);
+    } else {
+      setCurrentMindmap(mindmap);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg">Loading...</div>
-      </div>
-    );
+  const handleMindmapDataChange = (data: any) => {
+    scheduleAutoSave(data);
+  };
+
+  // Load mindmaps on component mount
+  useEffect(() => {
+    if (user && !loading) {
+      loadMindmaps();
+    }
+  }, [user, loading]);
+
+  // Cleanup auto-save timeout
+  useEffect(() => {
+    return () => {
+      if (autoSaveTimeout) {
+        clearTimeout(autoSaveTimeout);
+      }
+    };
+  }, [autoSaveTimeout]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center h-screen">Loading...</div>;
   }
 
-  if (!isAuthenticated) {
-    return null;
+  if (!user) {
+    return <div className="flex items-center justify-center h-screen">Please log in to continue.</div>;
   }
 
   return (
     <div className="h-screen flex flex-col bg-gray-50">
       <Header 
         currentMindmap={currentMindmap}
-        onMindmapNameChange={handleMindmapNameChange}
-        mindmaps={mindmaps || []}
-        onMindmapSelect={setCurrentMindmap}
+        onMindmapNameChange={handleMindmapNameChange} 
+        mindmaps={mindmaps}
+        onMindmapSelect={handleMindmapSelect}
       />
-      
-      <div className="flex flex-1 overflow-hidden">
-        <FloatingToolbar 
-          selectedTool={selectedTool}
-          onToolSelect={setSelectedTool}
-        />
-        
-        <div className="flex-1 relative">
-          <MindmapCanvas
-            mindmapData={currentMindmap?.data as MindmapData}
-            selectedTool={selectedTool}
-            selectedNode={selectedNode}
-            onNodeSelect={setSelectedNode}
-            onDataChange={handleMindmapUpdate}
-          />
-        </div>
 
-        {showPropertiesSidebar && (
-          <PropertiesSidebar
-            selectedNode={selectedNode}
-            onNodeUpdate={(nodeData) => {
-              if (currentMindmap && selectedNode) {
-                const data = currentMindmap.data as MindmapData;
-                const updatedNodes = data.nodes.map(node => 
-                  node.id === selectedNode.id ? { ...node, ...nodeData } : node
-                );
-                handleMindmapUpdate({
-                  ...data,
-                  nodes: updatedNodes
-                });
-              }
-            }}
-            onClose={() => setShowPropertiesSidebar(false)}
-          />
+      <div className="flex-1 relative">
+        <FloatingToolbar />
+        <MindmapCanvas 
+          mindmapData={currentMindmap?.data}
+          onDataChange={handleMindmapDataChange}
+        />
+        <FileOperations 
+          currentMindmap={currentMindmap}
+          onMindmapLoad={handleMindmapDataChange}
+        />
+        {sidebarOpen && (
+          <PropertiesSidebar onClose={() => setSidebarOpen(false)} />
         )}
       </div>
 
-      <FileOperations 
-        currentMindmap={currentMindmap}
-        onMindmapLoad={(data) => {
-          if (currentMindmap) {
-            handleMindmapUpdate(data);
-          }
-        }}
-      />
-
-      {/* Mobile toolbar */}
-      <div className="lg:hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-white rounded-full shadow-lg border border-gray-200 px-4 py-2 flex items-center space-x-4 z-50">
-        <button 
-          onClick={() => setSelectedTool("select")}
-          className={`p-2 ${selectedTool === "select" ? "text-blue-600" : "text-gray-600"}`}
-        >
-          <i className="fas fa-mouse-pointer"></i>
-        </button>
-        <button 
-          onClick={() => setSelectedTool("addNode")}
-          className={`p-2 ${selectedTool === "addNode" ? "text-blue-600" : "text-gray-600"}`}
-        >
-          <i className="fas fa-plus-circle"></i>
-        </button>
-        <button 
-          onClick={() => setSelectedTool("addConnection")}
-          className={`p-2 ${selectedTool === "addConnection" ? "text-blue-600" : "text-gray-600"}`}
-        >
-          <i className="fas fa-link"></i>
-        </button>
-        <button 
-          onClick={() => setShowPropertiesSidebar(!showPropertiesSidebar)}
-          className="p-2 text-gray-600"
-        >
-          <i className="fas fa-cog"></i>
-        </button>
-      </div>
+      {showMindmapList && (
+        <MindmapList
+          mindmaps={mindmaps}
+          onMindmapSelect={handleMindmapSelect}
+          onMindmapCreate={createMindmap}
+          onMindmapDelete={deleteMindmap}
+          onClose={() => setShowMindmapList(false)}
+        />
+      )}
     </div>
   );
 }
