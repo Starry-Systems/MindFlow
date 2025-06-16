@@ -82,7 +82,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(mindmaps)
       .where(eq(mindmaps.id, id) && eq(mindmaps.userId, userId));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 }
 

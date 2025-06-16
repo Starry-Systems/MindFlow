@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MindFlow - Visual Mindmapping</title>
+    <meta name="description" content="Create beautiful, interactive mindmaps with MindFlow. Export to XML, import existing files, and organize your thoughts visually.">
+    <link rel="stylesheet" href="/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading-screen">
+        <div class="spinner"></div>
+        <p>Loading MindFlow...</p>
+    </div>
+
+    <!-- Landing Page (for logged out users) -->
+    <div id="landing" class="landing-page hidden">
+        <header class="landing-header">
+            <div class="container">
+                <div class="header-content">
+                    <div class="logo">
+                        <i class="fas fa-brain"></i>
+                        <h1>MindFlow</h1>
+                    </div>
+                    <button id="loginBtn" class="btn-primary">Sign In</button>
+                </div>
+            </div>
+        </header>
+
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2>Visual Mindmapping <span class="highlight">Made Simple</span></h2>
+                    <p>Create beautiful, interactive mindmaps collaboratively. Organize your thoughts, plan projects, and visualize ideas with ease.</p>
+                    <button id="getStartedBtn" class="btn-primary btn-large">Get Started Free</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="features">
+            <div class="container">
+                <h3>Everything you need to visualize your ideas</h3>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <i class="fas fa-brain"></i>
+                        <h4>Intuitive Design</h4>
+                        <p>Drag-and-drop interface that feels natural and responsive</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-users"></i>
+                        <h4>Collaboration</h4>
+                        <p>Work together in real-time with your team members</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-download"></i>
+                        <h4>Export & Import</h4>
+                        <p>Save your work in multiple formats including XML</p>
+                    </div>
+                    <div class="feature-card">
+                        <i class="fas fa-bolt"></i>
+                        <h4>Fast & Reliable</h4>
+                        <p>Lightning-fast performance with auto-save functionality</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="cta">
+            <div class="container">
+                <div class="cta-content">
+                    <h3>Ready to organize your thoughts?</h3>
+                    <p>Join thousands of users who trust MindFlow for their visual thinking needs.</p>
+                    <button id="startCreatingBtn" class="btn-secondary btn-large">Start Creating Now</button>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Main Application (for logged in users) -->
+    <div id="app" class="app hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-brain"></i>
+                    <span>MindFlow</span>
+                </div>
+                <div class="document-info">
+                    <input type="text" id="documentTitle" class="document-title" value="Untitled Mindmap">
+                    <span class="save-status">Saved</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button id="shareBtn" class="btn-ghost">
+                    <i class="fas fa-share"></i>
+                    Share
+                </button>
+                <div class="user-menu">
+                    <button id="userMenuBtn" class="user-avatar">
+                        <span id="userInitials">U</span>
+                    </button>
+                    <div id="userDropdown" class="dropdown hidden">
+                        <div class="user-info">
+                            <div id="userName">User</div>
+                            <div id="userEmail">user@example.com</div>
+                        </div>
+                        <hr>
+                        <button class="dropdown-item">My Mindmaps</button>
+                        <button class="dropdown-item">Account Settings</button>
+                        <hr>
+                        <button id="logoutBtn" class="dropdown-item">Sign Out</button>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Floating Toolbar -->
+            <div class="floating-toolbar">
+                <button id="selectTool" class="tool-btn active" data-tool="select" title="Select">
+                    <i class="fas fa-mouse-pointer"></i>
+                </button>
+                <button id="addNodeTool" class="tool-btn" data-tool="addNode" title="Add Node">
+                    <i class="fas fa-plus-circle"></i>
+                </button>
+                <button id="addConnectionTool" class="tool-btn" data-tool="addConnection" title="Connect Nodes">
+                    <i class="fas fa-link"></i>
+                </button>
+                <div class="toolbar-separator"></div>
+                <button id="colorsTool" class="tool-btn" data-tool="colors" title="Node Colors">
+                    <i class="fas fa-palette"></i>
+                </button>
+                <button id="shapesTool" class="tool-btn" data-tool="shapes" title="Node Shapes">
+                    <i class="fas fa-shapes"></i>
+                </button>
+                <div class="toolbar-separator"></div>
+                <button id="zoomInTool" class="tool-btn" data-tool="zoomIn" title="Zoom In">
+                    <i class="fas fa-search-plus"></i>
+                </button>
+                <button id="zoomOutTool" class="tool-btn" data-tool="zoomOut" title="Zoom Out">
+                    <i class="fas fa-search-minus"></i>
+                </button>
+                <button id="fitToScreenTool" class="tool-btn" data-tool="fitToScreen" title="Fit to Screen">
+                    <i class="fas fa-expand"></i>
+                </button>
+            </div>
+
+            <!-- Canvas Container -->
+            <div class="canvas-container">
+                <canvas id="mindmapCanvas"></canvas>
+                <div class="canvas-controls">
+                    <div class="zoom-indicator">100%</div>
+                    <button id="resetZoomBtn" class="btn-outline">
+                        <i class="fas fa-crosshairs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Properties Sidebar -->
+            <div id="propertiesSidebar" class="properties-sidebar">
+                <div class="sidebar-header">
+                    <h3>Properties</h3>
+                    <button id="closeSidebarBtn" class="btn-ghost">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="sidebar-content">
+                    <!-- Node Properties -->
+                    <div id="nodeProperties" class="property-section hidden">
+                        <h4>Node Properties</h4>
+                        <div class="form-group">
+                            <label for="nodeText">Text</label>
+                            <input type="text" id="nodeText" placeholder="Node text">
+                        </div>
+                        <div class="form-group">
+                            <label>Color</label>
+                            <div class="color-palette">
+                                <button class="color-btn" data-color="#2563EB" style="background-color: #2563EB;"></button>
+                                <button class="color-btn" data-color="#10B981" style="background-color: #10B981;"></button>
+                                <button class="color-btn" data-color="#F59E0B" style="background-color: #F59E0B;"></button>
+                                <button class="color-btn" data-color="#8B5CF6" style="background-color: #8B5CF6;"></button>
+                                <button class="color-btn" data-color="#EF4444" style="background-color: #EF4444;"></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="nodeShape">Shape</label>
+                            <select id="nodeShape">
+                                <option value="rectangle">Rectangle</option>
+                                <option value="rounded-rectangle" selected>Rounded Rectangle</option>
+                                <option value="circle">Circle</option>
+                                <option value="diamond">Diamond</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Connection Properties -->
+                    <div class="property-section">
+                        <h4>Connection Style</h4>
+                        <div class="form-group">
+                            <label for="lineType">Line Type</label>
+                            <select id="lineType">
+                                <option value="curved" selected>Curved</option>
+                                <option value="straight">Straight</option>
+                                <option value="stepped">Stepped</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="thickness">Thickness</label>
+                            <input type="range" id="thickness" min="1" max="5" value="2">
+                        </div>
+                    </div>
+
+                    <!-- Document Settings -->
+                    <div class="property-section">
+                        <h4>Document</h4>
+                        <div class="form-group">
+                            <label>Background</label>
+                            <div class="background-options">
+                                <button class="bg-btn active" data-bg="#ffffff" style="background-color: #ffffff; border: 1px solid #ccc;"></button>
+                                <button class="bg-btn" data-bg="#f8fafc" style="background-color: #f8fafc;"></button>
+                                <button class="bg-btn" data-bg="#eff6ff" style="background-color: #eff6ff;"></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- File Operations Menu -->
+        <div class="file-menu">
+            <button id="saveBtn" class="btn-ghost" title="Save">
+                <i class="fas fa-save"></i>
+            </button>
+            <button id="downloadBtn" class="btn-ghost" title="Download">
+                <i class="fas fa-download"></i>
+            </button>
+            <button id="uploadBtn" class="btn-ghost" title="Upload">
+                <i class="fas fa-upload"></i>
+            </button>
+            <input type="file" id="fileInput" accept=".xml,.json,.mindmap" style="display: none;">
+        </div>
+    </div>
+
+    <!-- Download Modal -->
+    <div id="downloadModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Save Mindmap</h3>
+                <button class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="fileName">File Name</label>
+                    <input type="text" id="fileName" value="my-mindmap" placeholder="Enter file name">
+                </div>
+                <div class="form-group">
+                    <label for="fileFormat">Format</label>
+                    <select id="fileFormat">
+                        <option value="xml">XML Format (.xml)</option>
+                        <option value="json">JSON Format (.json)</option>
+                        <option value="mindmap">MindFlow Format (.mindmap)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancelDownload" class="btn-outline">Cancel</button>
+                <button id="confirmDownload" class="btn-primary">Download</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast" class="toast hidden">
+        <div class="toast-content">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+    <script src="/js/auth.js"></script>
+    <script src="/js/mindmap.js"></script>
+    <script src="/js/fileManager.js"></script>
+    <script src="/js/app.js"></script>
+</body>
+</html>

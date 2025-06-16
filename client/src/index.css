@@ -130,12 +130,12 @@ canvas {
 }
 
 .tool-hover {
-  @apply bg-primary/10 text-primary;
+  @apply bg-blue-50 text-primary;
 }
 
 /* File drop zone styles */
 .drop-zone-hover {
-  @apply border-primary bg-primary/5;
+  @apply border-primary bg-blue-50;
 }
 
 /* Floating elements */
