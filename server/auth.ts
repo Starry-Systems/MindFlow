@@ -100,7 +100,7 @@ export async function setupAuth(app: Express) {
           access_token: accessToken,
           refresh_token: refreshToken
         };
-        
+
         await upsertUserFromGoogle(profile);
         done(null, user);
       } catch (error) {
