@@ -3,8 +3,22 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertMindmapSchema } from "@shared/schema";
+import path from "path";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Serve static files
+  app.use('/css', (req, res, next) => {
+    res.sendFile(path.join(__dirname, '../static/css', req.path), (err) => {
+      if (err) next();
+    });
+  });
+  
+  app.use('/js', (req, res, next) => {
+    res.sendFile(path.join(__dirname, '../static/js', req.path), (err) => {
+      if (err) next();
+    });
+  });
+
   // Auth middleware
   await setupAuth(app);
 

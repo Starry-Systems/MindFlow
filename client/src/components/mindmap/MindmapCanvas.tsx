@@ -120,15 +120,15 @@ export default function MindmapCanvas({
     x: number, 
     y: number
   ) => {
-    const radius = 8;
+    const cornerRadius = 8;
     
     ctx.beginPath();
     switch (node.shape) {
       case 'circle':
         const centerX = x + width / 2;
         const centerY = y + height / 2;
-        const radius = Math.min(width, height) / 2;
-        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        const circleRadius = Math.min(width, height) / 2;
+        ctx.arc(centerX, centerY, circleRadius, 0, 2 * Math.PI);
         break;
       case 'diamond':
         ctx.moveTo(x + width / 2, y);
@@ -141,7 +141,22 @@ export default function MindmapCanvas({
         ctx.rect(x, y, width, height);
         break;
       default: // rounded-rectangle
-        ctx.roundRect(x, y, width, height, radius);
+        // Fallback for browsers that don't support roundRect
+        if (ctx.roundRect) {
+          ctx.roundRect(x, y, width, height, cornerRadius);
+        } else {
+          // Manual rounded rectangle implementation
+          ctx.moveTo(x + cornerRadius, y);
+          ctx.lineTo(x + width - cornerRadius, y);
+          ctx.quadraticCurveTo(x + width, y, x + width, y + cornerRadius);
+          ctx.lineTo(x + width, y + height - cornerRadius);
+          ctx.quadraticCurveTo(x + width, y + height, x + width - cornerRadius, y + height);
+          ctx.lineTo(x + cornerRadius, y + height);
+          ctx.quadraticCurveTo(x, y + height, x, y + height - cornerRadius);
+          ctx.lineTo(x, y + cornerRadius);
+          ctx.quadraticCurveTo(x, y, x + cornerRadius, y);
+          ctx.closePath();
+        }
         break;
     }
   };
