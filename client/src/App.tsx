@@ -29,9 +29,9 @@ function Router() {
 
   return (
     <Switch>
-      <Route path="/" component={() => <MindmapListPage />} />
-      <Route path="/mindmaps" component={() => <MindmapListPage />} />
-      <Route path="/mindmap/:id" component={() => <MindmapPage />} />
+      <Route path="/" component={MindmapListPage} />
+      <Route path="/mindmaps" component={MindmapListPage} />
+      <Route path="/mindmap/:id" component={MindmapPage} />
       <Route component={NotFound} />
     </Switch>
   );
