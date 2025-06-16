@@ -111,9 +111,6 @@ export default function Header({
               {user?.email}
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>My Mindmaps</DropdownMenuItem>
-            <DropdownMenuItem>Account Settings</DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => window.location.href = '/api/logout'}>
               Sign Out
             </DropdownMenuItem>
