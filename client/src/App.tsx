@@ -7,6 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import MindmapPage from "@/pages/mindmap";
+import MindmapListPage from "@/pages/mindmaps";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -17,7 +18,9 @@ function Router() {
         <Route path="/" component={Landing} />
       ) : (
         <>
-          <Route path="/" component={MindmapPage} />
+          <Route path="/mindmap/:id?" element={<MindmapPage />} />
+          <Route path="/mindmaps" element={<MindmapListPage />} />
+          <Route path="*" element={<NotFound />} />
         </>
       )}
       <Route component={NotFound} />

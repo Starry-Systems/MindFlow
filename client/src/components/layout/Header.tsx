@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Brain, ChevronDown, Share2 } from "lucide-react";
 import type { Mindmap } from "@shared/schema";
+import { useNavigate } from "react-router-dom";
 
 interface HeaderProps {
   currentMindmap: Mindmap | null;
@@ -28,6 +29,7 @@ export default function Header({
   const { user } = useAuth();
   const [isEditingName, setIsEditingName] = useState(false);
   const [editName, setEditName] = useState(currentMindmap?.name || "");
+  const navigate = useNavigate();
 
   const handleNameSave = () => {
     if (editName.trim()) {
@@ -47,7 +49,7 @@ export default function Header({
           <Brain className="h-8 w-8 text-blue-600" />
           <h1 className="text-xl font-semibold text-gray-900">MindFlow</h1>
         </div>
-        
+
         {/* Document Info */}
         <div className="hidden md:flex items-center space-x-2 ml-8">
           {isEditingName ? (

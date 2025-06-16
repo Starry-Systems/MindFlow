@@ -5,6 +5,12 @@ import { setupAuth, isAuthenticated } from "./auth";
 import { insertMindmapSchema } from "@shared/schema";
 import express from "express";
 
+import { db } from './db.js';
+import { requireAuth } from './auth.js';
+import { usersTable, mindmapsTable } from '../shared/schema.js';
+import { eq, and } from 'drizzle-orm';
+import crypto from 'crypto';
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Serve static files from the static directory
   app.use(express.static('static'));
