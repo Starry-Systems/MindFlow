@@ -7,3 +7,7 @@ vite.config.ts.*
 server.js
 *.env
 *.env.example
+.env.example
+/generated/prisma
+
+/generated/prisma

@@ -8,6 +8,21 @@ import Landing from "@/pages/landing";
 import MindmapPage from "@/pages/mindmap";
 import MindmapListPage from "@/pages/mindmaps";
 import React, { useEffect, useState } from 'react';
+import { useState } from "react";
+import AuthForm from "./components/AuthForm";
+import MindmapCanvas from "./components/MindmapCanvas";
+
+function App() {
+  const [token, setToken] = useState<string | null>(null);
+
+  if (!token) {
+    return <AuthForm onAuth={setToken} />;
+  }
+
+  return <MindmapCanvas token={token} />;
+}
+
+export default App;
 
 function useAuth() {
   const [isLoading, setLoading] = useState(true);
